@@ -2,6 +2,7 @@
 "./Core/Src/gpio.o"
 "./Core/Src/lcd.o"
 "./Core/Src/main.o"
+"./Core/Src/soft_uart.o"
 "./Core/Src/spi.o"
 "./Core/Src/stm32f4xx_hal_msp.o"
 "./Core/Src/stm32f4xx_it.o"

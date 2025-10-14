@@ -58,10 +58,10 @@ void Error_Handler(void);
 /* USER CODE END EFP */
 
 /* Private defines -----------------------------------------------------------*/
-#define RX_Pin GPIO_PIN_1
-#define RX_GPIO_Port GPIOA
-#define TX_Pin GPIO_PIN_2
-#define TX_GPIO_Port GPIOA
+#define SW_UART_TX_Pin GPIO_PIN_2
+#define SW_UART_TX_GPIO_Port GPIOA
+#define SW_UART_RX_Pin GPIO_PIN_3
+#define SW_UART_RX_GPIO_Port GPIOA
 /* USER CODE BEGIN Private defines */
 
 /* USER CODE END Private defines */

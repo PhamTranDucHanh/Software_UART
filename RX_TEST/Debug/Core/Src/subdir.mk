@@ -9,6 +9,7 @@ C_SRCS += \
 ../Core/Src/gpio.c \
 ../Core/Src/lcd.c \
 ../Core/Src/main.c \
+../Core/Src/soft_uart.c \
 ../Core/Src/spi.c \
 ../Core/Src/stm32f4xx_hal_msp.c \
 ../Core/Src/stm32f4xx_it.c \
@@ -23,6 +24,7 @@ OBJS += \
 ./Core/Src/gpio.o \
 ./Core/Src/lcd.o \
 ./Core/Src/main.o \
+./Core/Src/soft_uart.o \
 ./Core/Src/spi.o \
 ./Core/Src/stm32f4xx_hal_msp.o \
 ./Core/Src/stm32f4xx_it.o \
@@ -37,6 +39,7 @@ C_DEPS += \
 ./Core/Src/gpio.d \
 ./Core/Src/lcd.d \
 ./Core/Src/main.d \
+./Core/Src/soft_uart.d \
 ./Core/Src/spi.d \
 ./Core/Src/stm32f4xx_hal_msp.d \
 ./Core/Src/stm32f4xx_it.d \
