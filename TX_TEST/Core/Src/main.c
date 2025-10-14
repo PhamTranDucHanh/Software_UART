@@ -22,7 +22,7 @@
 
 /* Private includes ----------------------------------------------------------*/
 /* USER CODE BEGIN Includes */
-#include "soft_uart.h" // <<<--- 1. INCLUDE THƯ VIỆN CỦA BẠN Ở ĐÂY
+#include "soft_uart.h" // <<<--- 1. INCLUDE THƯ VIỆN CỦA BẠN Ở �?ÂY
 #include <string.h>    // <<<--- Thêm thư viện này để dùng strlen
 /* USER CODE END Includes */
 
@@ -57,9 +57,9 @@ static void MX_TIM2_Init(void);
 
 /* Private user code ---------------------------------------------------------*/
 /* USER CODE BEGIN 0 */
-// <<<--- 2. ĐẶT HÀM GỬI GÓI TIN CỦA MASTER Ở ĐÂY
+// <<<--- 2. �?ẶT HÀM GỬI GÓI TIN CỦA MASTER Ở �?ÂY
 
-// Định nghĩa gói tin
+// �?ịnh nghĩa gói tin
 #define START_BYTE 0xAA
 #define CMD_DISPLAY_TEXT 0x01
 
@@ -69,6 +69,7 @@ void master_send_string(const char* str) {
 
     // Gửi Start Byte
     soft_uart_transmit_byte(START_BYTE);
+    HAL_GPIO_TogglePin(GPIOC, GPIO_PIN_13);
 
     // Gửi Command Byte
     soft_uart_transmit_byte(CMD_DISPLAY_TEXT);
@@ -128,7 +129,7 @@ int main(void)
   {
 	  // <<<--- 4. GỌI HÀM GỬI DỮ LIỆU TRONG VÒNG LẶP
 	      master_send_string("Hello from Master!");
-	      HAL_Delay(2000); // Chờ 2 giây
+	      HAL_Delay(2000); // Ch�? 2 giây
 
     /* USER CODE END WHILE */
 
@@ -229,10 +230,21 @@ static void MX_GPIO_Init(void)
   GPIO_InitTypeDef GPIO_InitStruct = {0};
 
   /* GPIO Ports Clock Enable */
+  __HAL_RCC_GPIOC_CLK_ENABLE();
   __HAL_RCC_GPIOA_CLK_ENABLE();
 
   /*Configure GPIO pin Output Level */
+  HAL_GPIO_WritePin(LED_GPIO_Port, LED_Pin, GPIO_PIN_RESET);
+
+  /*Configure GPIO pin Output Level */
   HAL_GPIO_WritePin(SW_UART_TX_GPIO_Port, SW_UART_TX_Pin, GPIO_PIN_RESET);
+
+  /*Configure GPIO pin : LED_Pin */
+  GPIO_InitStruct.Pin = LED_Pin;
+  GPIO_InitStruct.Mode = GPIO_MODE_OUTPUT_PP;
+  GPIO_InitStruct.Pull = GPIO_NOPULL;
+  GPIO_InitStruct.Speed = GPIO_SPEED_FREQ_LOW;
+  HAL_GPIO_Init(LED_GPIO_Port, &GPIO_InitStruct);
 
   /*Configure GPIO pin : SW_UART_TX_Pin */
   GPIO_InitStruct.Pin = SW_UART_TX_Pin;

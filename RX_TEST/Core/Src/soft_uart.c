@@ -5,6 +5,7 @@
  *      Author: my pc
  */
 #include "soft_uart.h"
+#include "lcd.h"
 
 // Thời gian trễ cho 1 bit (tính bằng micro giây)
 // 1/9600 * 1,000,000 us/s ~= 104 us
@@ -48,10 +49,10 @@ void soft_uart_transmit_byte(uint8_t data) {
 // Hàm nhận 1 byte
 uint8_t soft_uart_receive_byte() {
     uint8_t received_data = 0;
-
+    //lcd_ShowStr(10, 150, "TEST", YELLOW, BLACK, 24, 0);
     // 1. Chờ đợi Start bit (đường truyền bị kéo xuống thấp)
     while (HAL_GPIO_ReadPin(SW_UART_RX_PORT, SW_UART_RX_PIN) == GPIO_PIN_SET);
-
+    //lcd_ShowStr(10, 190, "TEST2", YELLOW, BLACK, 24, 0);
     // 2. Đồng bộ hóa: Khi phát hiện Start bit, chờ 1 nửa bit time
     // để dịch chuyển đến điểm giữa của bit đầu tiên.
     delay_us(BIT_TIME_US / 2);

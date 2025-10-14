@@ -102,13 +102,13 @@ int main(void)
   /* USER CODE BEGIN 2 */
   soft_uart_init(); // <<<--- 3. KHỞI TẠO UART MÔ PHỎNG
 
-  // ================= THÊM VÀO ĐÂY =================
+  // ================= THÊM VÀO �?ÂY =================
   uint8_t cmd, len;
   uint8_t data_buffer[MAX_DATA_LEN];
   uint8_t checksum_received, checksum_calculated;
 
   lcd_init(); // Khởi tạo LCD
-  lcd_Clear(BLACK); // Xóa màn hình lúc bắt đầu
+  lcd_Clear(WHITE); // Xóa màn hình lúc bắt đầu
   // ===============================================
   /* USER CODE END 2 */
 
@@ -122,8 +122,9 @@ int main(void)
       // <<<--- 4. �?ẶT TOÀN BỘ LOGIC NHẬN VÀ XỬ L�? DỮ LIỆU Ở �?ÂY
 
       // 1. Ch�? Start Byte
+	  lcd_ShowStr(20, 100, "Slave is listening...", YELLOW, BLACK, 24, 0);
       if (soft_uart_receive_byte() == START_BYTE) {
-
+    	  lcd_ShowStr(10, 110, "TEST", YELLOW, BLACK, 24, 0);
           // 2. Nhận phần còn lại của gói tin
           cmd = soft_uart_receive_byte();
           len = soft_uart_receive_byte();
@@ -142,6 +143,7 @@ int main(void)
           }
 
           // 4. Xác thực và thực thi
+
           if (checksum_calculated == checksum_received) {
               if (cmd == CMD_DISPLAY_TEXT) {
                   data_buffer[len] = '\0'; // Biến nó thành chuỗi hợp lệ
@@ -182,7 +184,7 @@ void SystemClock_Config(void)
   RCC_OscInitStruct.PLL.PLLState = RCC_PLL_ON;
   RCC_OscInitStruct.PLL.PLLSource = RCC_PLLSOURCE_HSI;
   RCC_OscInitStruct.PLL.PLLM = 8;
-  RCC_OscInitStruct.PLL.PLLN = 168;
+  RCC_OscInitStruct.PLL.PLLN = 64;
   RCC_OscInitStruct.PLL.PLLP = RCC_PLLP_DIV2;
   RCC_OscInitStruct.PLL.PLLQ = 4;
   if (HAL_RCC_OscConfig(&RCC_OscInitStruct) != HAL_OK)
@@ -194,11 +196,11 @@ void SystemClock_Config(void)
   RCC_ClkInitStruct.ClockType = RCC_CLOCKTYPE_HCLK|RCC_CLOCKTYPE_SYSCLK
                               |RCC_CLOCKTYPE_PCLK1|RCC_CLOCKTYPE_PCLK2;
   RCC_ClkInitStruct.SYSCLKSource = RCC_SYSCLKSOURCE_PLLCLK;
-  RCC_ClkInitStruct.AHBCLKDivider = RCC_SYSCLK_DIV1;
-  RCC_ClkInitStruct.APB1CLKDivider = RCC_HCLK_DIV4;
-  RCC_ClkInitStruct.APB2CLKDivider = RCC_HCLK_DIV4;
+  RCC_ClkInitStruct.AHBCLKDivider = RCC_SYSCLK_DIV8;
+  RCC_ClkInitStruct.APB1CLKDivider = RCC_HCLK_DIV2;
+  RCC_ClkInitStruct.APB2CLKDivider = RCC_HCLK_DIV1;
 
-  if (HAL_RCC_ClockConfig(&RCC_ClkInitStruct, FLASH_LATENCY_5) != HAL_OK)
+  if (HAL_RCC_ClockConfig(&RCC_ClkInitStruct, FLASH_LATENCY_0) != HAL_OK)
   {
     Error_Handler();
   }
