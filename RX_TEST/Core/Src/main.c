@@ -109,7 +109,7 @@ int main(void)
 
   lcd_init(); // Khởi tạo LCD
   lcd_Clear(BLACK); // Xóa màn hình lúc bắt đầu
-  lcd_ShowStr(20, 100, "Slave is listening...", YELLOW, BLACK, 24, 0);
+  lcd_ShowStr(5, 20, "Slave is listening...", YELLOW, BLUE, 24, 0);
   // ===============================================
   /* USER CODE END 2 */
 
@@ -121,9 +121,9 @@ int main(void)
     /* USER CODE END WHILE */
 
     /* USER CODE BEGIN 3 */
-      // <<<--- 4. �?ẶT TOÀN BỘ LOGIC NHẬN VÀ XỬ L�? DỮ LIỆU Ở �?ÂY
 
-      // 1. Ch�? Start Byte
+
+      // 1. WAIT START BYTE
 
       if (soft_uart_receive_byte() == START_BYTE) {
     	  //lcd_ShowStr(10, 200, "TEST", GREEN, BLACK, 24, 0);
@@ -145,16 +145,18 @@ int main(void)
           }
 
           // 4. Xác thực và thực thi
-          lcd_ShowIntNum(10, 170, checksum_calculated, 3, YELLOW, BLUE, 24);
-          lcd_ShowIntNum(80, 170, checksum_received, 3, YELLOW, BLUE, 24);
+          lcd_ShowStr(5, 170, "sum_tx = ", YELLOW, BLACK, 24, 0);
+          lcd_ShowStr(5, 195, "sum_rx = ", YELLOW, BLACK, 24, 0);
+          lcd_ShowIntNum(100, 170, checksum_calculated, 3, YELLOW, BLUE, 24);
+          lcd_ShowIntNum(100, 195, checksum_received, 3, YELLOW, BLUE, 24);
           if (checksum_calculated == checksum_received) {
-        	  lcd_ShowStr(10, 240, "TEST", BLUE, BLACK, 24, 0);
+
               if (cmd == CMD_DISPLAY_TEXT) {
                   data_buffer[len] = '\0'; // Biến nó thành chuỗi hợp lệ
                   printf("Received OK: %s\r\n", (char*)data_buffer);
-                  lcd_Fill(30, 30, lcddev.width, 70, BLACK);
-                  lcd_ShowStr(10, 30, "Receive OK:", GREEN, BLACK, 24, 0);
-                  lcd_ShowStr(10, 55, (char*)data_buffer, YELLOW, BLACK, 24, 0);
+
+                  lcd_ShowStr(10, 90, "Receive OK:", GREEN, BLACK, 24, 0);
+                  lcd_ShowStr(10, 115, (char*)data_buffer, YELLOW, BLACK, 24, 0);
               }
           } else {
               printf("Checksum Error!\r\n");
