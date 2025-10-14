@@ -102,18 +102,20 @@ int main(void)
   /* USER CODE BEGIN 2 */
   soft_uart_init(); // <<<--- 3. KHỞI TẠO UART MÔ PHỎNG
 
-  // ================= THÊM VÀO �?ÂY =================
+  // ================= THÊM VÀO �?ÂY =================
   uint8_t cmd, len;
   uint8_t data_buffer[MAX_DATA_LEN];
   uint8_t checksum_received, checksum_calculated;
 
   lcd_init(); // Khởi tạo LCD
-  lcd_Clear(WHITE); // Xóa màn hình lúc bắt đầu
+  lcd_Clear(BLACK); // Xóa màn hình lúc bắt đầu
+  lcd_ShowStr(20, 100, "Slave is listening...", YELLOW, BLACK, 24, 0);
   // ===============================================
   /* USER CODE END 2 */
 
   /* Infinite loop */
   /* USER CODE BEGIN WHILE */
+
   while (1)
     {
     /* USER CODE END WHILE */
@@ -122,9 +124,9 @@ int main(void)
       // <<<--- 4. �?ẶT TOÀN BỘ LOGIC NHẬN VÀ XỬ L�? DỮ LIỆU Ở �?ÂY
 
       // 1. Ch�? Start Byte
-	  lcd_ShowStr(20, 100, "Slave is listening...", YELLOW, BLACK, 24, 0);
+
       if (soft_uart_receive_byte() == START_BYTE) {
-    	  lcd_ShowStr(10, 110, "TEST", YELLOW, BLACK, 24, 0);
+    	  //lcd_ShowStr(10, 200, "TEST", GREEN, BLACK, 24, 0);
           // 2. Nhận phần còn lại của gói tin
           cmd = soft_uart_receive_byte();
           len = soft_uart_receive_byte();
@@ -143,19 +145,21 @@ int main(void)
           }
 
           // 4. Xác thực và thực thi
-
+          lcd_ShowIntNum(10, 170, checksum_calculated, 3, YELLOW, BLUE, 24);
+          lcd_ShowIntNum(80, 170, checksum_received, 3, YELLOW, BLUE, 24);
           if (checksum_calculated == checksum_received) {
+        	  lcd_ShowStr(10, 240, "TEST", BLUE, BLACK, 24, 0);
               if (cmd == CMD_DISPLAY_TEXT) {
                   data_buffer[len] = '\0'; // Biến nó thành chuỗi hợp lệ
                   printf("Received OK: %s\r\n", (char*)data_buffer);
-                  lcd_Fill(100, 30, lcddev.width, 70, BLACK);
-                  lcd_ShowStr(100, 30, "Receive OK:", YELLOW, BLACK, 24, 0);
-                  lcd_ShowStr(100, 55, (char*)data_buffer, YELLOW, BLACK, 24, 0);
+                  lcd_Fill(30, 30, lcddev.width, 70, BLACK);
+                  lcd_ShowStr(10, 30, "Receive OK:", GREEN, BLACK, 24, 0);
+                  lcd_ShowStr(10, 55, (char*)data_buffer, YELLOW, BLACK, 24, 0);
               }
           } else {
               printf("Checksum Error!\r\n");
-              lcd_Fill(100, 30, lcddev.width, 70, BLACK);
-              lcd_ShowStr(100, 50, "Checksum Error!", YELLOW, BLACK, 24, 0);
+              lcd_Fill(20, 30, lcddev.width, 70, BLACK);
+              lcd_ShowStr(20, 50, "Checksum Error!", RED, BLACK, 24, 0);
           }
       }
     }
