@@ -22,16 +22,26 @@
 
 /* Private includes ----------------------------------------------------------*/
 /* USER CODE BEGIN Includes */
+#include "software_timer.h" // Thư viện timer tự chế của bạn
+#include "UART_Sender.h"    // Thư viện gửi UART tự chế của bạn
 
 /* USER CODE END Includes */
 
 /* Private typedef -----------------------------------------------------------*/
 /* USER CODE BEGIN PTD */
+// �?ịnh nghĩa các trạng thái cho máy trạng thái trong hàm main()
+// Giúp code dễ đ�?c và dễ hiểu hơn là dùng số 0 và 1.
+enum {
+	STATE_IDLE,    // Trạng thái nghỉ, ch�? để gửi byte tiếp theo
+	STATE_SENDING  // Trạng thái đang bận rộn gửi các bit của 1 byte
+};
 
 /* USER CODE END PTD */
 
 /* Private define ------------------------------------------------------------*/
 /* USER CODE BEGIN PD */
+#define BIT_DURATION_MS   1000   // Th�?i gian gửi 1 bit (500ms để debug)
+#define INTER_BYTE_DELAY_MS 15000  // Th�?i gian nghỉ giữa 2 byte (2 giây)
 /* USER CODE END PD */
 
 /* Private macro -------------------------------------------------------------*/
@@ -43,6 +53,8 @@
 TIM_HandleTypeDef htim2;
 
 /* USER CODE BEGIN PV */
+// Biến toàn cục để lưu trạng thái hiện tại của chương trình
+int main_task_state = STATE_IDLE;
 
 /* USER CODE END PV */
 
@@ -56,6 +68,20 @@ static void MX_TIM2_Init(void);
 
 /* Private user code ---------------------------------------------------------*/
 /* USER CODE BEGIN 0 */
+/**
+  * @brief  �?ây là hàm callback của Timer phần cứng (TIM2).
+  * @note   Nó sẽ tự động được g�?i mỗi khi TIM2 đếm xong (được cấu hình là 1ms).
+  *         �?ây chính là "nhịp đập" trái tim, cung cấp năng lượng cho hệ thống
+  *         software_timer mà bạn đã tự viết.
+  * @param  htim: con tr�? tới timer đã gây ra ngắt.
+  * @retval None
+  */
+void HAL_TIM_PeriodElapsedCallback(TIM_HandleTypeDef *htim)
+{
+  if (htim->Instance == TIM2) {
+    timerRun();
+  }
+}
 
 /* USER CODE END 0 */
 
@@ -90,44 +116,106 @@ int main(void)
   MX_TIM2_Init();
   /* USER CODE BEGIN 2 */
   HAL_TIM_Base_Start_IT(&htim2);
+
+  // Biến để lưu giá trị số cần gửi, bắt đầu từ 0
+  uint8_t msg_to_send = 5;
+
+  // Biến để nhận kết quả trả v�? từ hàm uart_send_byte()
+  int sending_status = 0;
+
+  // Thiết lập timer số 0 để đi�?u khiển th�?i gian gửi mỗi bit
+  timerSet(0, BIT_DURATION_MS);
+
+  // Thiết lập timer số 1 để tạo khoảng nghỉ giữa các byte
+  timerSet(1, INTER_BYTE_DELAY_MS);
   /* USER CODE END 2 */
 
   /* Infinite loop */
   /* USER CODE BEGIN WHILE */
-  uint8_t msg = 0;
-  timerSet (0, 6);
-  timerSet (1, 1000);
-  int enable = 1;
-  int complete = 0;
+  //uint8_t msg = 0;
+  //timerSet (0, 6);
+  //timerSet (1, 1000);
+  //int enable = 1;
+  //int complete = 0;
+  //timerSet (0, 500);
   while (1)
   {
-	  if (complete == 1){
-		  enable = 0;
-		  timerSet(1, 1000);
-	  }
-	  if (complete == 2 && timerFlag(1)){
-		  enable = 1;
-		  msg++;
-	  }
-	  if (timerFlag(0)){
-		  timerSet(0, 6);
-		  complete = uart_send_byte(msg, enable);
-	        // hàm này trả 0 nếu chưa xong,
-	        // 1 nếu vừa xong byte,
-	        // 2 nếu đang bị disable
-	  }
 
-//  	  if (timerFlag(1)){
-//  		  timerSet(1, 500);
-//  		  HAL_GPIO_TogglePin(GPIOA, TX_Pin);
-//  		  HAL_GPIO_TogglePin(GPIOC, LED_Pin);
-//  	  }
+//	  if (timerFlag(0)){
+//		  HAL_GPIO_TogglePin(GPIOA, TX_Pin);
+//	  }
+//	  HAL_GPIO_TogglePin(GPIOA, GPIO_PIN_1);
+//	  HAL_Delay(1000);
 
+
+
+
+
+
+
+
+    // Cấu trúc switch-case để quản lý các trạng thái của chương trình
+    switch (main_task_state)
+    {
+      case STATE_IDLE:
+        // Ở trạng thái nghỉ, chúng ta chỉ cần kiểm tra timer 1 (timer nghỉ giữa các byte)
+        if (timerFlag(1)) {
+          // Timer 1 đã đếm xong! �?ã đến lúc gửi byte tiếp theo.
+
+          // 1. Chuyển sang trạng thái đang gửi
+          main_task_state = STATE_SENDING;
+
+          // 2. G�?i hàm gửi lần đầu tiên để gửi ngay lập tức bit đầu tiên (Start Bit)
+          //    Tham số thứ hai là '1' để cho phép (enable) việc gửi.
+          uart_send_byte(msg_to_send, 1);
+
+          // 3. Sau khi gửi start bit, cài đặt lại timer 0 để 500ms sau sẽ gửi bit tiếp theo
+          timerSet(0, BIT_DURATION_MS);
+        }
+        break;
+
+      case STATE_SENDING:
+        // Ở trạng thái đang gửi, chúng ta kiểm tra timer 0 (timer giữa các bit)
+        if (timerFlag(0)) {
+          // �?ã hết 500ms, đã đến lúc gửi bit tiếp theo.
+
+          // 1. Cài đặt lại timer 0 cho 500ms tiếp theo ngay lập tức
+          //timerSet(0, BIT_DURATION_MS);
+        	HAL_Delay(1000);
+
+          // 2. G�?i hàm gửi bit và lưu lại kết quả trả v�?
+          sending_status = uart_send_byte(msg_to_send, 1);
+
+          // 3. Kiểm tra kết quả
+          if (sending_status == 1) {
+            // Nếu hàm trả v�? 1, có nghĩa là đã gửi xong toàn bộ byte (bao gồm cả Stop Bit).
+            // Công việc hoàn thành, đã đến lúc nghỉ ngơi.
+
+            // a. Chuyển v�? trạng thái nghỉ
+            main_task_state = STATE_IDLE;
+
+            // b. Tăng giá trị của số cần gửi lên 1 cho lần sau
+            msg_to_send = 5;
+
+            // c. Cài đặt lại timer 1 để bắt đầu đếm 2 giây nghỉ
+            //timerSet(1, INTER_BYTE_DELAY_MS);
+            HAL_Delay(15000);
+          }
+        }
+        break;
+
+      default:
+        // Trư�?ng hợp phòng h�? nếu biến trạng thái bị lỗi
+        main_task_state = STATE_IDLE;
+        break;
+    }
 
     /* USER CODE END WHILE */
 
     /* USER CODE BEGIN 3 */
+
   }
+
   /* USER CODE END 3 */
 }
 
@@ -146,7 +234,9 @@ void SystemClock_Config(void)
   RCC_OscInitStruct.OscillatorType = RCC_OSCILLATORTYPE_HSI;
   RCC_OscInitStruct.HSIState = RCC_HSI_ON;
   RCC_OscInitStruct.HSICalibrationValue = RCC_HSICALIBRATION_DEFAULT;
-  RCC_OscInitStruct.PLL.PLLState = RCC_PLL_NONE;
+  RCC_OscInitStruct.PLL.PLLState = RCC_PLL_ON;
+  RCC_OscInitStruct.PLL.PLLSource = RCC_PLLSOURCE_HSI_DIV2;
+  RCC_OscInitStruct.PLL.PLLMUL = RCC_PLL_MUL2;
   if (HAL_RCC_OscConfig(&RCC_OscInitStruct) != HAL_OK)
   {
     Error_Handler();
@@ -155,10 +245,10 @@ void SystemClock_Config(void)
   */
   RCC_ClkInitStruct.ClockType = RCC_CLOCKTYPE_HCLK|RCC_CLOCKTYPE_SYSCLK
                               |RCC_CLOCKTYPE_PCLK1|RCC_CLOCKTYPE_PCLK2;
-  RCC_ClkInitStruct.SYSCLKSource = RCC_SYSCLKSOURCE_HSI;
+  RCC_ClkInitStruct.SYSCLKSource = RCC_SYSCLKSOURCE_PLLCLK;
   RCC_ClkInitStruct.AHBCLKDivider = RCC_SYSCLK_DIV1;
-  RCC_ClkInitStruct.APB1CLKDivider = RCC_HCLK_DIV1;
-  RCC_ClkInitStruct.APB2CLKDivider = RCC_HCLK_DIV1;
+  RCC_ClkInitStruct.APB1CLKDivider = RCC_HCLK_DIV4;
+  RCC_ClkInitStruct.APB2CLKDivider = RCC_HCLK_DIV4;
 
   if (HAL_RCC_ClockConfig(&RCC_ClkInitStruct, FLASH_LATENCY_0) != HAL_OK)
   {
@@ -237,6 +327,12 @@ static void MX_GPIO_Init(void)
   GPIO_InitStruct.Speed = GPIO_SPEED_FREQ_LOW;
   HAL_GPIO_Init(LED_GPIO_Port, &GPIO_InitStruct);
 
+  /*Configure GPIO pin : RX_Pin */
+  GPIO_InitStruct.Pin = RX_Pin;
+  GPIO_InitStruct.Mode = GPIO_MODE_INPUT;
+  GPIO_InitStruct.Pull = GPIO_PULLUP;
+  HAL_GPIO_Init(RX_GPIO_Port, &GPIO_InitStruct);
+
   /*Configure GPIO pin : TX_Pin */
   GPIO_InitStruct.Pin = TX_Pin;
   GPIO_InitStruct.Mode = GPIO_MODE_OUTPUT_PP;
@@ -244,18 +340,10 @@ static void MX_GPIO_Init(void)
   GPIO_InitStruct.Speed = GPIO_SPEED_FREQ_LOW;
   HAL_GPIO_Init(TX_GPIO_Port, &GPIO_InitStruct);
 
-  /*Configure GPIO pin : RX_Pin */
-  GPIO_InitStruct.Pin = RX_Pin;
-  GPIO_InitStruct.Mode = GPIO_MODE_INPUT;
-  GPIO_InitStruct.Pull = GPIO_PULLUP;
-  HAL_GPIO_Init(RX_GPIO_Port, &GPIO_InitStruct);
-
 }
 
 /* USER CODE BEGIN 4 */
-void HAL_TIM_PeriodElapsedCallback(TIM_HandleTypeDef *htim){
-	timerRun();
-}
+
 /* USER CODE END 4 */
 
 /**
