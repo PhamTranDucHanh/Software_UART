@@ -27,8 +27,7 @@
 
 /* Private includes ----------------------------------------------------------*/
 /* USER CODE BEGIN Includes */
-#include "soft_uart.h" // <<<--- 1. INCLUDE THƯ VIỆN CỦA BẠN Ở �?ÂY
-#include <stdio.h>     // <<<--- Thêm thư viện này để debug bằng printf (tùy ch�?n)
+#include "soft_uart.h"
 #include "lcd.h"
 /* USER CODE END Includes */
 
@@ -39,6 +38,9 @@
 
 /* Private define ------------------------------------------------------------*/
 /* USER CODE BEGIN PD */
+#define START_BYTE 0xAA
+#define CMD_DISPLAY_TEXT 0x01
+#define MAX_DATA_LEN 50
 /* USER CODE END PD */
 
 /* Private macro -------------------------------------------------------------*/
@@ -60,10 +62,6 @@ void SystemClock_Config(void);
 
 /* Private user code ---------------------------------------------------------*/
 /* USER CODE BEGIN 0 */
-// <<<--- 2. �?ỊNH NGHĨA C�?C THAM S�? CHO SLAVE
-#define START_BYTE 0xAA
-#define CMD_DISPLAY_TEXT 0x01
-#define MAX_DATA_LEN 50
 /* USER CODE END 0 */
 
 /**
@@ -100,16 +98,12 @@ int main(void)
   MX_USART3_UART_Init();
   MX_USART2_UART_Init();
   /* USER CODE BEGIN 2 */
-  soft_uart_init(); // <<<--- 3. KHỞI TẠO UART MÔ PHỎNG
 
-  // ================= THÊM VÀO �?ÂY =================
-  uint8_t cmd, len;
-  uint8_t data_buffer[MAX_DATA_LEN];
-  uint8_t checksum_received, checksum_calculated;
+  soft_uart_init();
 
-  lcd_init(); // Khởi tạo LCD
-  lcd_Clear(BLACK); // Xóa màn hình lúc bắt đầu
-  lcd_ShowStr(20, 100, "Slave is listening...", YELLOW, BLACK, 24, 0);
+  lcd_init();
+  lcd_Clear(BLACK);
+  lcd_ShowStr(5, 10, "Slave is listening...", YELLOW, BLACK, 24, 0);
   // ===============================================
   /* USER CODE END 2 */
 
@@ -118,50 +112,11 @@ int main(void)
 
   while (1)
     {
+	  HAL_GPIO_TogglePin(DEBUG_LED_GPIO_Port, DEBUG_LED_Pin);
+	  HAL_Delay(1000);
     /* USER CODE END WHILE */
 
     /* USER CODE BEGIN 3 */
-      // <<<--- 4. �?ẶT TOÀN BỘ LOGIC NHẬN VÀ XỬ L�? DỮ LIỆU Ở �?ÂY
-
-      // 1. Ch�? Start Byte
-
-      if (soft_uart_receive_byte() == START_BYTE) {
-    	  //lcd_ShowStr(10, 200, "TEST", GREEN, BLACK, 24, 0);
-          // 2. Nhận phần còn lại của gói tin
-          cmd = soft_uart_receive_byte();
-          len = soft_uart_receive_byte();
-
-          if (len > MAX_DATA_LEN) continue; // Tránh tràn bộ đệm
-
-          for (int i = 0; i < len; i++) {
-              data_buffer[i] = soft_uart_receive_byte();
-          }
-          checksum_received = soft_uart_receive_byte();
-
-          // 3. Tính toán lại checksum
-          checksum_calculated = cmd + len;
-          for (int i = 0; i < len; i++) {
-              checksum_calculated += data_buffer[i];
-          }
-
-          // 4. Xác thực và thực thi
-          lcd_ShowIntNum(10, 170, checksum_calculated, 3, YELLOW, BLUE, 24);
-          lcd_ShowIntNum(80, 170, checksum_received, 3, YELLOW, BLUE, 24);
-          if (checksum_calculated == checksum_received) {
-        	  lcd_ShowStr(10, 240, "TEST", BLUE, BLACK, 24, 0);
-              if (cmd == CMD_DISPLAY_TEXT) {
-                  data_buffer[len] = '\0'; // Biến nó thành chuỗi hợp lệ
-                  printf("Received OK: %s\r\n", (char*)data_buffer);
-                  lcd_Fill(30, 30, lcddev.width, 70, BLACK);
-                  lcd_ShowStr(10, 30, "Receive OK:", GREEN, BLACK, 24, 0);
-                  lcd_ShowStr(10, 55, (char*)data_buffer, YELLOW, BLACK, 24, 0);
-              }
-          } else {
-              printf("Checksum Error!\r\n");
-              lcd_Fill(20, 30, lcddev.width, 70, BLACK);
-              lcd_ShowStr(20, 50, "Checksum Error!", RED, BLACK, 24, 0);
-          }
-      }
     }
   /* USER CODE END 3 */
 }
@@ -211,6 +166,45 @@ void SystemClock_Config(void)
 }
 
 /* USER CODE BEGIN 4 */
+uint8_t start, cmd, len;
+uint8_t data_buffer[MAX_DATA_LEN];
+uint8_t checksum_received, checksum_calculated;
+void HAL_GPIO_EXTI_Callback(uint16_t GPIO_Pin) {
+    if (GPIO_Pin == ENABLE_Pin) { 	// PC3
+    	start = soft_uart_receive_byte();
+    	cmd = soft_uart_receive_byte();
+    	len = soft_uart_receive_byte();
+        for (int i = 0; i < len; i++) {
+            data_buffer[i] = soft_uart_receive_byte();
+        }
+        checksum_received = soft_uart_receive_byte();
+        if (start == START_BYTE) {
+
+            //if (len > MAX_DATA_LEN) continue;
+
+            checksum_calculated = cmd + len;
+            for (int i = 0; i < len; i++) {
+                checksum_calculated += data_buffer[i];
+            }
+
+            lcd_ShowStr(10, 40, "Checksum cal:", RED, BLACK, 24, 0);
+            lcd_ShowIntNum(10, 70, checksum_calculated, 3, RED, BLACK, 24);
+            lcd_ShowStr(10, 100, "Checksum received:", RED, BLACK, 24, 0);
+            lcd_ShowIntNum(10, 130, checksum_received, 3, RED, BLACK, 24);
+
+            if (checksum_calculated == checksum_received) {
+                if (cmd == CMD_DISPLAY_TEXT) {
+                    data_buffer[len] = '\0';
+                    lcd_ShowStr(10, 160, "Received message:", GREEN, BLACK, 24, 0);
+                    lcd_ShowStr(10, 190, "                   ", YELLOW, BLACK, 24, 0);
+                    lcd_ShowStr(10, 190, (char*)data_buffer, YELLOW, BLACK, 24, 0);
+                }
+            } else {
+                lcd_ShowStr(20, 160, "Checksum Error!", RED, BLACK, 24, 0);
+            }
+        }
+    }
+}
 
 /* USER CODE END 4 */
 

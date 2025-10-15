@@ -3,6 +3,7 @@
  *
  *  Created on: Oct 14, 2025
  *      Author: DuongDepTrai
+ *      Modifier: Duc Hanh
  */
 
 #include "soft_uart.h"
@@ -69,4 +70,31 @@ uint8_t soft_uart_receive_byte() {
     delay_us(BIT_TIME_US);
 
     return received_data;
+}
+
+void master_send_string(const char* str) {
+	uint8_t len = strlen(str);
+    uint8_t checksum = 0;
+    HAL_GPIO_WritePin(ENABLE_GPIO_Port, ENABLE_Pin, 0);
+    // Gửi Start Byte
+    soft_uart_transmit_byte(START_BYTE);
+    HAL_GPIO_TogglePin(GPIOC, GPIO_PIN_13);
+
+    // Gửi Command Byte
+    soft_uart_transmit_byte(CMD_DISPLAY_TEXT);
+    checksum += CMD_DISPLAY_TEXT;
+
+    // Gửi Length Byte
+    soft_uart_transmit_byte(len);
+    checksum += len;
+
+    // Gửi các byte dữ liệu
+    for (int i = 0; i < len; i++) {
+        soft_uart_transmit_byte(str[i]);
+        checksum += str[i];
+    }
+
+    // Gửi Checksum
+    soft_uart_transmit_byte(checksum);
+    HAL_GPIO_WritePin(ENABLE_GPIO_Port, ENABLE_Pin, 1);
 }
