@@ -32,7 +32,7 @@ extern "C" {
 
 /* Private includes ----------------------------------------------------------*/
 /* USER CODE BEGIN Includes */
-
+#include <string.h>
 /* USER CODE END Includes */
 
 /* Exported types ------------------------------------------------------------*/
@@ -70,6 +70,9 @@ void Error_Handler(void);
 #define ESP12_BUSY_GPIO_Port GPIOF
 #define ESP12_PWR_Pin GPIO_PIN_10
 #define ESP12_PWR_GPIO_Port GPIOF
+#define ENABLE_Pin GPIO_PIN_3
+#define ENABLE_GPIO_Port GPIOC
+#define ENABLE_EXTI_IRQn EXTI3_IRQn
 #define SW_UART_TX_Pin GPIO_PIN_4
 #define SW_UART_TX_GPIO_Port GPIOA
 #define SW_UART_RX_Pin GPIO_PIN_5

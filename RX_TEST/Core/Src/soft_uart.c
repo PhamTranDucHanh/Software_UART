@@ -2,7 +2,8 @@
  * soft_uart.c
  *
  *  Created on: Oct 14, 2025
- *      Author: my pc
+ *      Author: Duong
+ *      Modifier: Duc Hanh
  */
 #include "soft_uart.h"
 #include "lcd.h"
@@ -49,10 +50,10 @@ void soft_uart_transmit_byte(uint8_t data) {
 // Hàm nhận 1 byte
 uint8_t soft_uart_receive_byte() {
     uint8_t received_data = 0;
-    //lcd_ShowStr(10, 150, "TEST", YELLOW, BLACK, 24, 0);
     // 1. Chờ đợi Start bit (đường truyền bị kéo xuống thấp)
-    while (HAL_GPIO_ReadPin(SW_UART_RX_PORT, SW_UART_RX_PIN) == GPIO_PIN_SET);
-    //lcd_ShowStr(10, 190, "TEST2", YELLOW, BLACK, 24, 0);
+    while (HAL_GPIO_ReadPin(SW_UART_RX_PORT, SW_UART_RX_PIN) == GPIO_PIN_SET){
+    	if (HAL_GPIO_ReadPin(ENABLE_GPIO_Port, ENABLE_Pin) == 1);
+    }
     // 2. Đồng bộ hóa: Khi phát hiện Start bit, chờ 1 nửa bit time
     // để dịch chuyển đến điểm giữa của bit đầu tiên.
     delay_us(BIT_TIME_US / 2);
@@ -71,3 +72,29 @@ uint8_t soft_uart_receive_byte() {
     return received_data;
 }
 
+void master_send_string(const char* str) {
+	uint8_t len = strlen(str);
+    uint8_t checksum = 0;
+    HAL_GPIO_WritePin(ENABLE_GPIO_Port, ENABLE_Pin, 0);
+    // Gửi Start Byte
+    soft_uart_transmit_byte(START_BYTE);
+    HAL_GPIO_TogglePin(GPIOC, GPIO_PIN_13);
+
+    // Gửi Command Byte
+    soft_uart_transmit_byte(CMD_DISPLAY_TEXT);
+    checksum += CMD_DISPLAY_TEXT;
+
+    // Gửi Length Byte
+    soft_uart_transmit_byte(len);
+    checksum += len;
+
+    // Gửi các byte dữ liệu
+    for (int i = 0; i < len; i++) {
+        soft_uart_transmit_byte(str[i]);
+        checksum += str[i];
+    }
+
+    // Gửi Checksum
+    soft_uart_transmit_byte(checksum);
+    HAL_GPIO_WritePin(ENABLE_GPIO_Port, ENABLE_Pin, 1);
+}

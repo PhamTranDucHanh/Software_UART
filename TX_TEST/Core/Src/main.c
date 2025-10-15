@@ -22,8 +22,7 @@
 
 /* Private includes ----------------------------------------------------------*/
 /* USER CODE BEGIN Includes */
-#include "soft_uart.h" // <<<--- 1. INCLUDE THƯ VIỆN CỦA BẠN Ở �?ÂY
-#include <string.h>    // <<<--- Thêm thư viện này để dùng strlen
+#include "soft_uart.h"
 /* USER CODE END Includes */
 
 /* Private typedef -----------------------------------------------------------*/
@@ -57,37 +56,6 @@ static void MX_TIM2_Init(void);
 
 /* Private user code ---------------------------------------------------------*/
 /* USER CODE BEGIN 0 */
-// <<<--- 2. �?ẶT HÀM GỬI GÓI TIN CỦA MASTER Ở �?ÂY
-
-// �?ịnh nghĩa gói tin
-#define START_BYTE 0xAA
-#define CMD_DISPLAY_TEXT 0x01
-
-void master_send_string(const char* str) {
-    uint8_t len = strlen(str);
-    uint8_t checksum = 0;
-
-    // Gửi Start Byte
-    soft_uart_transmit_byte(START_BYTE);
-    HAL_GPIO_TogglePin(GPIOC, GPIO_PIN_13);
-
-    // Gửi Command Byte
-    soft_uart_transmit_byte(CMD_DISPLAY_TEXT);
-    checksum += CMD_DISPLAY_TEXT;
-
-    // Gửi Length Byte
-    soft_uart_transmit_byte(len);
-    checksum += len;
-
-    // Gửi các byte dữ liệu
-    for (int i = 0; i < len; i++) {
-        soft_uart_transmit_byte(str[i]);
-        checksum += str[i];
-    }
-
-    // Gửi Checksum
-    soft_uart_transmit_byte(checksum);
-}
 /* USER CODE END 0 */
 
 /**
@@ -120,18 +88,17 @@ int main(void)
   MX_GPIO_Init();
   MX_TIM2_Init();
   /* USER CODE BEGIN 2 */
-  soft_uart_init(); // <<<--- 3. KHỞI TẠO UART MÔ PHỎNG (SAU KHI KHỞI TẠO TIMER)
+  soft_uart_init();
   /* USER CODE END 2 */
 
   /* Infinite loop */
   /* USER CODE BEGIN WHILE */
   while (1)
   {
-	  // <<<--- 4. GỌI HÀM GỬI DỮ LIỆU TRONG VÒNG LẶP
 	      master_send_string("Hello from Master!");
-	      HAL_Delay(2000);
+	      HAL_Delay(4000);
 	      master_send_string("HANHJZXE!!");
-	      HAL_Delay(2000);
+	      HAL_Delay(4000);
 
     /* USER CODE END WHILE */
 
@@ -239,7 +206,7 @@ static void MX_GPIO_Init(void)
   HAL_GPIO_WritePin(LED_GPIO_Port, LED_Pin, GPIO_PIN_RESET);
 
   /*Configure GPIO pin Output Level */
-  HAL_GPIO_WritePin(SW_UART_TX_GPIO_Port, SW_UART_TX_Pin, GPIO_PIN_RESET);
+  HAL_GPIO_WritePin(GPIOA, SW_UART_TX_Pin|ENABLE_Pin, GPIO_PIN_RESET);
 
   /*Configure GPIO pin : LED_Pin */
   GPIO_InitStruct.Pin = LED_Pin;
@@ -248,12 +215,12 @@ static void MX_GPIO_Init(void)
   GPIO_InitStruct.Speed = GPIO_SPEED_FREQ_LOW;
   HAL_GPIO_Init(LED_GPIO_Port, &GPIO_InitStruct);
 
-  /*Configure GPIO pin : SW_UART_TX_Pin */
-  GPIO_InitStruct.Pin = SW_UART_TX_Pin;
+  /*Configure GPIO pins : SW_UART_TX_Pin ENABLE_Pin */
+  GPIO_InitStruct.Pin = SW_UART_TX_Pin|ENABLE_Pin;
   GPIO_InitStruct.Mode = GPIO_MODE_OUTPUT_PP;
   GPIO_InitStruct.Pull = GPIO_NOPULL;
   GPIO_InitStruct.Speed = GPIO_SPEED_FREQ_LOW;
-  HAL_GPIO_Init(SW_UART_TX_GPIO_Port, &GPIO_InitStruct);
+  HAL_GPIO_Init(GPIOA, &GPIO_InitStruct);
 
   /*Configure GPIO pin : SW_UART_RX_Pin */
   GPIO_InitStruct.Pin = SW_UART_RX_Pin;
