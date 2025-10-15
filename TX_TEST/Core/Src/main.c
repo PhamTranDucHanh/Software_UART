@@ -22,8 +22,8 @@
 
 /* Private includes ----------------------------------------------------------*/
 /* USER CODE BEGIN Includes */
-#include "soft_uart.h" // <<<--- 1. INCLUDE THƯ VIỆN CỦA BẠN Ở �?ÂY
-#include <string.h>    // <<<--- Thêm thư viện này để dùng strlen
+#include "soft_uart.h"
+#include <string.h>
 /* USER CODE END Includes */
 
 /* Private typedef -----------------------------------------------------------*/
@@ -33,6 +33,8 @@
 
 /* Private define ------------------------------------------------------------*/
 /* USER CODE BEGIN PD */
+#define START_BYTE 0xAA
+#define CMD_DISPLAY_TEXT 0x01
 /* USER CODE END PD */
 
 /* Private macro -------------------------------------------------------------*/
@@ -57,11 +59,6 @@ static void MX_TIM2_Init(void);
 
 /* Private user code ---------------------------------------------------------*/
 /* USER CODE BEGIN 0 */
-// <<<--- 2. �?ẶT HÀM GỬI GÓI TIN CỦA MASTER Ở �?ÂY
-
-// �?ịnh nghĩa gói tin
-#define START_BYTE 0xAA
-#define CMD_DISPLAY_TEXT 0x01
 
 void master_send_string(const char* str) {
     uint8_t len = strlen(str);
@@ -120,16 +117,17 @@ int main(void)
   MX_GPIO_Init();
   MX_TIM2_Init();
   /* USER CODE BEGIN 2 */
-  soft_uart_init(); // <<<--- 3. KHỞI TẠO UART MÔ PHỎNG (SAU KHI KHỞI TẠO TIMER)
+  soft_uart_init();
   /* USER CODE END 2 */
 
   /* Infinite loop */
   /* USER CODE BEGIN WHILE */
   while (1)
   {
-	  // <<<--- 4. GỌI HÀM GỬI DỮ LIỆU TRONG VÒNG LẶP
-	      master_send_string("Hello from Master!");
-	      HAL_Delay(2000); // Ch�? 2 giây
+	      master_send_string("Hello from Bluepill!");
+	      HAL_Delay(2000);
+	      master_send_string("adbcdedf");
+	      HAL_Delay(2000);
 
     /* USER CODE END WHILE */
 
