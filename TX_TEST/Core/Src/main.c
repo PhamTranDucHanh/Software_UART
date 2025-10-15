@@ -129,7 +129,9 @@ int main(void)
   {
 	  // <<<--- 4. GỌI HÀM GỬI DỮ LIỆU TRONG VÒNG LẶP
 	      master_send_string("Hello from Master!");
-	      HAL_Delay(2000); // Ch�? 2 giây
+	      HAL_Delay(2000);
+	      master_send_string("HANHJZXE!!");
+	      HAL_Delay(2000);
 
     /* USER CODE END WHILE */
 
