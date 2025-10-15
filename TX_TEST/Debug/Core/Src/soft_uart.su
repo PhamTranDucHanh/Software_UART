@@ -1,4 +1,0 @@
-soft_uart.c:15:6:delay_us	16	static
-soft_uart.c:21:6:soft_uart_init	8	static
-soft_uart.c:29:6:soft_uart_transmit_byte	24	static
-soft_uart.c:50:9:soft_uart_receive_byte	16	static
