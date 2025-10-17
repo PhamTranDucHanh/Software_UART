@@ -67,7 +67,7 @@ The Slave operates in an interrupt-driven manner to efficiently handle incoming 
 ## Limitations
 - **CPU Usage**: Bit-banging requires precise timing and can block the CPU during transmission/reception.
 - **Baud Rate**: Limited by the timer resolution and system clock speed.
-- **Error Handling**: Requires robust checksum validation to ensure data integrity.
+- **Error Handling**: Requires robust checksum validation to ensure data integrity
 
 ---
 
