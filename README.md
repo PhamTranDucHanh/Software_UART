@@ -74,6 +74,12 @@ The Slave operates in an interrupt-driven manner to efficiently handle incoming 
 ## Demo
 
 ### Images
+<img width="780" height="410" alt="image" src="https://github.com/user-attachments/assets/00590e20-44e8-4436-82bd-951157026024" />
+
+
+<img width="780" height="410" alt="image" src="https://github.com/user-attachments/assets/3d26dab1-fa56-45ae-a4cd-f7da12feb171" />
+
+
 
 ### Videos (Google drive link)
 
