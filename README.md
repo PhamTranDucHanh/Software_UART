@@ -1,4 +1,4 @@
-# Software UART Implementation
+# Software UART Implementation.
 
 ## Overview
 Software UART (Soft UART) is a technique to emulate UART communication using GPIO pins and timers instead of relying on hardware UART peripherals. This approach is based on **bit-banging**, where individual bits of data are manually controlled and read through GPIO pins at precise time intervals.
