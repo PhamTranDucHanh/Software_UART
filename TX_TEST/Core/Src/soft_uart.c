@@ -52,7 +52,7 @@ uint8_t soft_uart_receive_byte() {
     uint8_t received_data = 0;
 
     // 1. Chờ đợi Start bit (đường truyền bị kéo xuống thấp)
-    while (HAL_GPIO_ReadPin(SW_UART_RX_PORT, SW_UART_RX_PIN) == GPIO_PIN_SET);
+//    while (HAL_GPIO_ReadPin(SW_UART_RX_PORT, SW_UART_RX_PIN) == GPIO_PIN_SET);
 
     // 2. Đồng bộ hóa: Khi phát hiện Start bit, chờ 1 nửa bit time
     // để dịch chuyển đến điểm giữa của bit đầu tiên.
