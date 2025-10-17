@@ -95,10 +95,10 @@ int main(void)
   /* USER CODE BEGIN WHILE */
   while (1)
   {
-	      master_send_string("Hello from Master!");
-	      HAL_Delay(4000);
+	      master_send_string("Duong dep trai");
+	      HAL_Delay(1000);
 	      master_send_string("HANHJZXE!!");
-	      HAL_Delay(4000);
+	      HAL_Delay(1000);
 
     /* USER CODE END WHILE */
 

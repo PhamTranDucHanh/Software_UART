@@ -107,7 +107,7 @@ int main(void)
 
   lcd_init();
   lcd_Clear(BLACK);
-  lcd_ShowStr(5, 10, "Slave is listening...", YELLOW, BLACK, 24, 0);
+  lcd_ShowStr(5, 10, "Slave is listening...", YELLOW, BLUE, 24, 0);
   // ===============================================
   /* USER CODE END 2 */
 
@@ -134,10 +134,10 @@ int main(void)
 	                checksum_calculated += data_buffer[i];
 	            }
 
-	            lcd_ShowStr(10, 40, "Checksum cal:", RED, BLACK, 24, 0);
-	            lcd_ShowIntNum(10, 70, checksum_calculated, 3, RED, BLACK, 24);
-	            lcd_ShowStr(10, 100, "Checksum received:", RED, BLACK, 24, 0);
-	            lcd_ShowIntNum(10, 130, checksum_received, 3, RED, BLACK, 24);
+	            lcd_ShowStr(10, 70, "Checksum cal:", GREEN, BLACK, 24, 0);
+	            lcd_ShowIntNum(170, 70, checksum_calculated, 3, GREEN, BLACK, 24);
+	            lcd_ShowStr(10, 100, "Checksum rx:", GREEN, BLACK, 24, 0);
+	            lcd_ShowIntNum(170, 100, checksum_received, 3, GREEN, BLACK, 24);
 
 	            if (checksum_calculated == checksum_received) {
 	                if (cmd == CMD_DISPLAY_TEXT) {
