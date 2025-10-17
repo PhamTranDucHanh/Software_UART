@@ -103,7 +103,7 @@ int main(void)
 
   lcd_init();
   lcd_Clear(BLACK);
-  lcd_ShowStr(5, 10, "Slave is listening...", YELLOW, BLACK, 24, 0);
+  lcd_ShowStr(5, 10, "Slave is listening...", YELLOW, BLUE, 24, 0);
   // ===============================================
   /* USER CODE END 2 */
 
@@ -181,16 +181,17 @@ void HAL_GPIO_EXTI_Callback(uint16_t GPIO_Pin) {
         if (start == START_BYTE) {
 
             //if (len > MAX_DATA_LEN) continue;
-
+        	//Calculate sum
             checksum_calculated = cmd + len;
             for (int i = 0; i < len; i++) {
                 checksum_calculated += data_buffer[i];
             }
 
-            lcd_ShowStr(10, 40, "Checksum cal:", RED, BLACK, 24, 0);
-            lcd_ShowIntNum(10, 70, checksum_calculated, 3, RED, BLACK, 24);
-            lcd_ShowStr(10, 100, "Checksum received:", RED, BLACK, 24, 0);
-            lcd_ShowIntNum(10, 130, checksum_received, 3, RED, BLACK, 24);
+            // Verification and execute
+            lcd_ShowStr(10, 40, "Checksum cal:", GREEN, BLACK, 24, 0);
+            lcd_ShowIntNum(10, 70, checksum_calculated, 3, GREEN, BLACK, 24);
+            lcd_ShowStr(10, 100, "Checksum received:", GREEN, BLACK, 24, 0);
+            lcd_ShowIntNum(10, 130, checksum_received, 3, GREEN, BLACK, 24);
 
             if (checksum_calculated == checksum_received) {
                 if (cmd == CMD_DISPLAY_TEXT) {
