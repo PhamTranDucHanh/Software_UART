@@ -81,8 +81,8 @@ The Slave operates in an interrupt-driven manner to efficiently handle incoming 
 
 
 
-### Videos (Google drive link)
-
+### Video and presentation (Google drive link)
+https://drive.google.com/file/d/1RpmNoXKfKmAMvlSbh8t64U9sSdjNziwV/view?usp=drivesdk
 
 ---
 
