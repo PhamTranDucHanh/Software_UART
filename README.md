@@ -84,6 +84,9 @@ The Slave operates in an interrupt-driven manner to efficiently handle incoming 
 ### Video and presentation (Google drive link)
 https://drive.google.com/file/d/1RpmNoXKfKmAMvlSbh8t64U9sSdjNziwV/view?usp=drivesdk
 
+### Report 1 (Overleaf link)
+https://www.overleaf.com/6424167144djrtgpmgccqc#1a79ae
+
 ---
 
 For detailed implementation, refer to the functions `soft_uart_transmit_byte()` and `soft_uart_receive_byte()` in the source code.
